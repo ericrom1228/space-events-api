@@ -28,7 +28,7 @@ space_api/
 ### Install Dependencies
 Run the following command to install required Python packages:
 ```sh
-pip install fastapi uvicorn motor pydantic[dotenv] python-dotenv
+pip install -r requirements.txt
 ```
 
 ## Configuration
