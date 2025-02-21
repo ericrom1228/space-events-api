@@ -1,20 +1,17 @@
-# Space API
+# Space Events API
 
 ## Overview
-Space API is a FastAPI-based project designed to provide space-related news and a historical archive of space events. It integrates with MongoDB to store and retrieve event data efficiently.
+Space Events API is a FastAPI-based project designed to provide a historical archive of space-related events. It integrates with MongoDB to store and retrieve event data efficiently, offering a RESTful interface for CRUD operations.
 
 ## Project Structure
 ```
-space_api/
+space-events-api/
 │── app/
 │   ├── main.py               # Entry point for FastAPI
 │   ├── database.py           # MongoDB connection
 │   ├── models.py             # Event schema/model
 │   ├── routes/
 │   │   ├── events.py         # API routes for events
-│   ├── services/
-│   │   ├── event_service.py  # Business logic for event handling
-│   ├── config.py             # Configuration settings
 │── requirements.txt          # Dependencies
 │── .env                      # Environment variables
 │── README.md                 # Project documentation
@@ -39,21 +36,22 @@ DB_NAME=space_db
 ```
 
 ## Running the API
-Start MongoDB (if not already running):
+1. Make sure MongoDB is running and accessible at localhost:27017
+
+2. Run FastAPI with Uvicorn:
 ```sh
-mongod --dbpath /your/db/path
+uvicorn app.main:app --host 0.0.0.0 --port 52793 --reload
 ```
 
-Run FastAPI with Uvicorn:
-```sh
-uvicorn app.main:app --reload
-```
+The API will be available at:
+- API: http://localhost:52793
+- Interactive API docs: http://localhost:52793/docs
 
 ## API Endpoints
 
 ### Root Endpoint
 - `GET /`
-  - Returns a welcome message.
+  - Returns a welcome message and API information.
 
 ### Events Endpoints
 - `GET /events/`
@@ -62,36 +60,77 @@ uvicorn app.main:app --reload
   - Retrieves a specific event by ID.
 - `POST /events/`
   - Creates a new event.
+- `PUT /events/{event_id}`
+  - Updates an existing event.
+- `DELETE /events/{event_id}`
+  - Deletes an event.
 
-## Database Schema
+## Event Schema
 ```json
 {
-  "title": "string",
-  "description": "string",
-  "date": "ISODate",
-  "type": "string",
-  "location": "string",
-  "source": "string",
-  "related_links": ["string"],
+  "title": "string (required)",
+  "description": "string (optional)",
+  "date": "datetime (required, ISO format)",
+  "type": "string (optional)",
+  "location": "string (optional)",
+  "source": "URL (optional)",
+  "related_links": ["URL"],
   "tags": ["string"],
-  "media": { "images": ["string"], "videos": ["string"] },
-  "created_at": "ISODate",
-  "updated_at": "ISODate"
+  "media": {
+    "images": ["URL"],
+    "videos": ["URL"]
+  },
+  "created_at": "datetime (auto-generated)",
+  "updated_at": "datetime (auto-generated)"
 }
 ```
 
-## Swagger UI
-Once the API is running, visit:
+## Example Usage
+
+### Create a New Event
+```bash
+curl -X POST "http://localhost:52793/events/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "SpaceX Starship Launch",
+    "description": "First orbital test flight of Starship",
+    "date": "2024-03-14T10:00:00Z",
+    "type": "Launch",
+    "location": "Starbase, Texas",
+    "tags": ["SpaceX", "Starship", "Test Flight"]
+  }'
 ```
-http://127.0.0.1:8000/docs
+
+### Get All Events
+```bash
+curl "http://localhost:52793/events/"
 ```
-for interactive API documentation.
+
+### Get a Specific Event
+```bash
+curl "http://localhost:52793/events/{event_id}"
+```
+
+### Update an Event
+```bash
+curl -X PUT "http://localhost:52793/events/{event_id}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "description": "Updated description"
+  }'
+```
+
+### Delete an Event
+```bash
+curl -X DELETE "http://localhost:52793/events/{event_id}"
+```
 
 ## Future Enhancements
 - Implement user authentication
 - Add data fetching from external space news sources
 - Advanced search and filtering
+- Pagination for event listings
+- Event categories and filtering
 
 ---
 Developed using FastAPI and MongoDB 🚀
-
