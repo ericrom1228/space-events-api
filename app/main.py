@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import events
+from app.settings import settings
 
 app = FastAPI(
     title="Space Events API",
     description="API for managing space-related events and historical data",
-    version="1.0.0"
+    version=settings.API_VERSION
 )
 
 # Configure CORS
@@ -28,4 +29,16 @@ async def read_root():
         "endpoints": {
             "events": "/events"
         }
+    }
+
+@app.get("/about", tags=["admin"])
+async def read_about():
+    return {
+        "name": "Space Events API",
+        "description": "API for managing space-related events and historical data",
+        "version": settings.VERSION,
+        "build datetime": settings.BUILD_DATETIME,
+        "api version": settings.API_VERSION,
+        "mongo URI": settings.MONGO_URI,
+        "database": settings.DB_NAME
     }

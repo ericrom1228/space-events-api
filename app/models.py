@@ -39,5 +39,5 @@ class EventDB(EventBase):
     updated_at: datetime = Field(default_factory=datetime.utcnow)  # Timestamp of the last update
 
     class Config:
-        orm_mode = True  # Enables ORM-style access
+        from_attributes = True  # Enables ORM-style access
         json_encoders = {datetime: lambda v: v.isoformat()}  # Ensures datetime fields are serialized properly

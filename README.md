@@ -8,6 +8,7 @@ Space Events API is a FastAPI-based project designed to provide a historical arc
 space-events-api/
 │── app/
 │   ├── main.py               # Entry point for FastAPI
+│   ├── settings              # pydantic-settings (reads in from .env file)
 │   ├── database.py           # MongoDB connection
 │   ├── models.py             # Event schema/model
 │   ├── routes/
@@ -19,7 +20,7 @@ space-events-api/
 
 ## Installation
 ### Prerequisites
-- Python 3.8+
+- Python 3.12+
 - MongoDB installed and running
 
 ### Install Dependencies
@@ -29,23 +30,25 @@ pip install -r requirements.txt
 ```
 
 ## Configuration
-Create a `.env` file in the project root with the following content:
-```
-MONGO_URI=mongodb://localhost:27017
-DB_NAME=space_db
-```
+Configuration is done with the following heirarchy from lowest to highest priority:
+1. **Default variables:** can be found in [settings.py](./app/settings.py).
+2. **Environment file:** `.env` file should be placed in the project root (not `/app`). The variables in this file override
+the default variables.
+3. **Environment variables:** can be set directly in the shell. The variables set directly in the environment override the 
+variables in the environment file.
 
 ## Running the API
 1. Make sure MongoDB is running and accessible at localhost:27017
 
 2. Run FastAPI with Uvicorn:
 ```sh
-uvicorn app.main:app --host 0.0.0.0 --port 52793 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 3000 --reload
 ```
 
 The API will be available at:
-- API: http://localhost:52793
-- Interactive API docs: http://localhost:52793/docs
+- API: http://localhost:3000
+- Interactive API docs: http://localhost:3000/docs
+- [Redoc](https://github.com/Redocly/redoc) docs: http://localhost:3000/redoc
 
 ## API Endpoints
 
@@ -89,7 +92,7 @@ The API will be available at:
 
 ### Create a New Event
 ```bash
-curl -X POST "http://localhost:52793/events/" \
+curl -X POST "http://localhost:3000/events/" \
   -H "Content-Type: application/json" \
   -d '{
     "title": "SpaceX Starship Launch",
@@ -103,17 +106,17 @@ curl -X POST "http://localhost:52793/events/" \
 
 ### Get All Events
 ```bash
-curl "http://localhost:52793/events/"
+curl "http://localhost:3000/events/"
 ```
 
 ### Get a Specific Event
 ```bash
-curl "http://localhost:52793/events/{event_id}"
+curl "http://localhost:3000/events/{event_id}"
 ```
 
 ### Update an Event
 ```bash
-curl -X PUT "http://localhost:52793/events/{event_id}" \
+curl -X PUT "http://localhost:3000/events/{event_id}" \
   -H "Content-Type: application/json" \
   -d '{
     "description": "Updated description"
@@ -122,7 +125,7 @@ curl -X PUT "http://localhost:52793/events/{event_id}" \
 
 ### Delete an Event
 ```bash
-curl -X DELETE "http://localhost:52793/events/{event_id}"
+curl -X DELETE "http://localhost:3000/events/{event_id}"
 ```
 
 ## Future Enhancements
