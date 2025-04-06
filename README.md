@@ -42,13 +42,13 @@ variables in the environment file.
 
 2. Run FastAPI with Uvicorn:
 ```sh
-uvicorn app.main:app --host 0.0.0.0 --port 3000 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 3001 --reload
 ```
 
 The API will be available at:
-- API: http://localhost:3000
-- Interactive API docs: http://localhost:3000/docs
-- [Redoc](https://github.com/Redocly/redoc) docs: http://localhost:3000/redoc
+- API: http://localhost:3001
+- Interactive API docs: http://localhost:3001/docs
+- [Redoc](https://github.com/Redocly/redoc) docs: http://localhost:3001/redoc
 
 ## API Endpoints
 
@@ -92,7 +92,7 @@ The API will be available at:
 
 ### Create a New Event
 ```bash
-curl -X POST "http://localhost:3000/events/" \
+curl -X POST "http://localhost:3001/events/" \
   -H "Content-Type: application/json" \
   -d '{
     "title": "SpaceX Starship Launch",
@@ -106,17 +106,17 @@ curl -X POST "http://localhost:3000/events/" \
 
 ### Get All Events
 ```bash
-curl "http://localhost:3000/events/"
+curl "http://localhost:3001/events/"
 ```
 
 ### Get a Specific Event
 ```bash
-curl "http://localhost:3000/events/{event_id}"
+curl "http://localhost:3001/events/{event_id}"
 ```
 
 ### Update an Event
 ```bash
-curl -X PUT "http://localhost:3000/events/{event_id}" \
+curl -X PUT "http://localhost:3001/events/{event_id}" \
   -H "Content-Type: application/json" \
   -d '{
     "description": "Updated description"
@@ -125,8 +125,16 @@ curl -X PUT "http://localhost:3000/events/{event_id}" \
 
 ### Delete an Event
 ```bash
-curl -X DELETE "http://localhost:3000/events/{event_id}"
+curl -X DELETE "http://localhost:3001/events/{event_id}"
 ```
+
+## Postman
+You can find a comprehensive postman collection under the [postman directory](./tests/postman).
+
+To use this collection:
+1. Open postman
+2. Select `Import`
+3. Drop the collection file here
 
 ## Future Enhancements
 - Implement user authentication

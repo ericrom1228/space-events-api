@@ -28,7 +28,7 @@ def event_helper(event) -> EventDB:
 
 
 # Create an event
-@router.post("/", response_model=EventDB)
+@router.post("", response_model=EventDB)
 async def create_event(event: EventCreate):
     # new_event = event.dict()
     new_event = event.model_dump()
@@ -43,7 +43,7 @@ async def create_event(event: EventCreate):
 
 
 # Get all events
-@router.get("/", response_model=List[EventDB])
+@router.get("", response_model=List[EventDB])
 async def get_events():
     events_cursor = events_collection.find()
     events = await events_cursor.to_list(length=100)
