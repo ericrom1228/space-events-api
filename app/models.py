@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, field_serializer
 from datetime import datetime
 from typing import List, Optional
 
@@ -21,6 +21,13 @@ class EventBase(BaseModel):
     tags: List[str] = []  # List of associated tags
     media: Optional[Media] = None  # Optional media containing images and videos
 
+    # Convert HttpUrl fields to plain strings before storing in MongoDB
+    @field_serializer("source", "related_links")
+    def serialize_url(self, value):
+        if isinstance(value, list):
+            return [str(url) for url in value]
+        return str(value) if value else None
+
 
 # Model for creating a new event, inheriting from EventBase
 class EventCreate(EventBase):
@@ -34,10 +41,10 @@ class EventUpdate(EventBase):
 
 # Model for an event stored in the database
 class EventDB(EventBase):
-    id: str = Field(..., alias="_id")  # MongoDB document ID
+    id: str
     created_at: datetime = Field(default_factory=datetime.utcnow)  # Timestamp when the event was created
     updated_at: datetime = Field(default_factory=datetime.utcnow)  # Timestamp of the last update
 
     class Config:
-        orm_mode = True  # Enables ORM-style access
+        from_attributes = True  # Enables ORM-style access
         json_encoders = {datetime: lambda v: v.isoformat()}  # Ensures datetime fields are serialized properly

@@ -1,24 +1,44 @@
-from typing import Union
-
 from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+from app.routes import events
+from app.settings import settings
 
-app = FastAPI()
+app = FastAPI(
+    title="Space Events API",
+    description="API for managing space-related events and historical data",
+    version=settings.API_VERSION
+)
 
-class Item(BaseModel):
-    name: str
-    price: float
-    is_offer: Union[bool, None] = None
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.get("/")
+# Include event routes
+app.include_router(events.router, prefix="/events", tags=["events"])
+
+@app.get("/", tags=["root"])
 async def read_root():
-    return {"Hello": "World"}
+    return {
+        "message": "Welcome to the Space Events API",
+        "docs": "/docs",
+        "endpoints": {
+            "events": "/events"
+        }
+    }
 
-
-@app.get("/items/{item_id}")
-async def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
-
-@app.put("/items/{item_id}")
-async def update_item(item_id: int, item: Item):
-    return {"item_name": item.name, "item_id": item_id}
+@app.get("/about", tags=["admin"])
+async def read_about():
+    return {
+        "name": "Space Events API",
+        "description": "API for managing space-related events and historical data",
+        "version": settings.VERSION,
+        "build datetime": settings.BUILD_DATETIME,
+        "api version": settings.API_VERSION,
+        "mongo URI": settings.MONGO_URI,
+        "database": settings.DB_NAME
+    }

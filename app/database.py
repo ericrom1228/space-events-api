@@ -1,19 +1,17 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
-from dotenv import load_dotenv
+from app.settings import settings
 
 # Load environment variables from .env file
-load_dotenv()
 
-# MongoDB connection settings
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-DB_NAME = os.getenv("DB_NAME", "space_db")
-
+# MongoDB's connection settings
+print("MONGO_URI:", settings.MONGO_URI)
+print("DB_NAME:", settings.DB_NAME)
 # Create a MongoDB client
-client = AsyncIOMotorClient(MONGO_URI)
+client = AsyncIOMotorClient(settings.MONGO_URI)
 
 # Get the database instance
-database = client[DB_NAME]
+database = client[settings.DB_NAME]
 
 # Get the events collection
 events_collection = database["events"]
