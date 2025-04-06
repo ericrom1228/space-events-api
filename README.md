@@ -136,6 +136,44 @@ To use this collection:
 2. Select `Import`
 3. Drop the collection file here
 
+## Testing
+
+### Running Tests
+To run the test suite:
+```sh
+pytest
+```
+
+This will:
+1. Run all tests
+2. Generate a coverage report in the terminal
+3. Create an HTML coverage report in the `htmlcov` directory
+
+### Test Coverage Report
+To view the HTML coverage report:
+1. Run the tests as shown above
+2. Open `htmlcov/index.html` in your web browser
+
+### Writing Tests
+Tests are located in the `tests` directory. The test suite uses:
+- pytest as the testing framework
+- pytest-asyncio for testing async code
+- pytest-cov for coverage reporting
+- mongomock for mocking MongoDB
+- TestClient from FastAPI for testing HTTP endpoints
+
+To add new tests:
+1. Create a new test file in the `tests` directory (must start with `test_`)
+2. Use the fixtures defined in `conftest.py` as needed
+3. Use the `@pytest.mark.asyncio` decorator for async tests
+4. Follow the existing test patterns for consistency
+
+### Test Configuration
+Test settings are defined in `pytest.ini`:
+- Tests run against a mock MongoDB database
+- Coverage reports are generated for the `app` directory
+- Async tests are automatically handled
+
 ## Future Enhancements
 - Implement user authentication
 - Add data fetching from external space news sources
