@@ -1,6 +1,7 @@
+import bson
 from fastapi import APIRouter, HTTPException
 from typing import List
-from datetime import datetime
+from datetime import datetime, UTC
 from bson import ObjectId
 from app.database import events_collection
 from app.models import EventCreate, EventDB, EventUpdate
@@ -29,12 +30,14 @@ def event_helper(event) -> EventDB:
 # Create an event
 @router.post("/", response_model=EventDB)
 async def create_event(event: EventCreate):
-    new_event = event.dict()
-    new_event["created_at"] = datetime.utcnow()
-    new_event["updated_at"] = datetime.utcnow()
+    # new_event = event.dict()
+    new_event = event.model_dump()
+    new_event["created_at"] = datetime.now(UTC)
+    new_event["updated_at"] = datetime.now(UTC)
 
+    # print("new_event:", new_event)
     result = await events_collection.insert_one(new_event)
-    new_event["_id"] = result.inserted_id
+    new_event["id"] = result.inserted_id
 
     return event_helper(new_event)
 
@@ -51,7 +54,13 @@ async def get_events():
 # Get a single event by ID
 @router.get("/{event_id}", response_model=EventDB)
 async def get_event(event_id: str):
-    event = await events_collection.find_one({"_id": ObjectId(event_id)})
+    try:
+        event = await events_collection.find_one({"_id": ObjectId(event_id)})
+    except bson.errors.InvalidId as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"{e}"
+        )
 
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
