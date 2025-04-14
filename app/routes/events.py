@@ -30,14 +30,14 @@ def event_helper(event) -> EventDB:
 
 
 # Create an event
-@router.post("/", response_model=EventDB)
+@router.post("/", response_model=EventDB, status_code=201)
 async def create_event(event: EventCreate, db: AsyncIOMotorDatabase = Depends(get_database)):
     new_event = event.model_dump()
     new_event["created_at"] = datetime.now(UTC)
     new_event["updated_at"] = datetime.now(UTC)
     event_dict = jsonable_encoder(new_event)
     result = await db["events"].insert_one(event_dict)
-    new_event["id"] = result.inserted_id
+    new_event["_id"] = result.inserted_id
     return event_helper(new_event)
 
 
