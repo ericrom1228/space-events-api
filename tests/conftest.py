@@ -2,28 +2,32 @@ import pytest
 from fastapi.testclient import TestClient
 from mongomock_motor import AsyncMongoMockClient
 from app.main import app
-from app.database import get_db
+from app.dependencies import get_database
+
 
 @pytest.fixture
-def test_app():
+def app_mock():
     return app
+
 
 @pytest.fixture
 def client():
     return TestClient(app)
 
+
 @pytest.fixture
 async def mock_db():
     client = AsyncMongoMockClient()
-    db = client.test_space_events
+    db = client['test_space_events']
     
     # Override the dependency
     async def override_get_db():
         return db
     
-    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_database] = override_get_db
     yield db
     app.dependency_overrides.clear()
+
 
 @pytest.fixture
 def sample_event():

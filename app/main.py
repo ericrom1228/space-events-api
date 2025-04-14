@@ -2,12 +2,24 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import events
 from app.settings import settings
+from app.dependencies import connect_to_mongo, close_mongo_connection
 
 app = FastAPI(
     title="Space Events API",
     description="API for managing space-related events and historical data",
     version=settings.API_VERSION
 )
+
+
+@app.on_event("startup")
+async def startup_event():
+    await connect_to_mongo(app)
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await close_mongo_connection(app)
+
 
 # Configure CORS
 app.add_middleware(

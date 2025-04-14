@@ -8,6 +8,10 @@ class Media(BaseModel):
     images: List[HttpUrl] = []  # List of image URLs
     videos: List[HttpUrl] = []  # List of video URLs
 
+    @field_serializer("images", "videos")
+    def serialize_urls(self, value):
+        return [str(url) for url in value]
+
 
 # Base model for an event, containing common fields
 class EventBase(BaseModel):
