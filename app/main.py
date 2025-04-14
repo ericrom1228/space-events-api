@@ -54,3 +54,7 @@ async def read_about():
         "mongo URI": settings.MONGO_URI,
         "database": settings.DB_NAME
     }
+
+@app.get("/health", tags=["admin"])
+async def read_health():
+    return {}
