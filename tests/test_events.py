@@ -13,11 +13,11 @@ async def test_create_event(client, mock_db, sample_event):
 @pytest.mark.asyncio
 async def test_get_events(client, mock_db, sample_event):
     # Create a test event first
-    response = client.post("/events/", json=sample_event)
+    response = client.post("/events", json=sample_event)
     assert response.status_code == status.HTTP_201_CREATED
     
     # Get all events
-    response = client.get("/events/")
+    response = client.get("/events")
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     assert isinstance(data, list)
@@ -30,14 +30,14 @@ async def test_get_event(client, mock_db, sample_event):
     # Create a test event first
     response = client.post("/events", json=sample_event)
     assert response.status_code == status.HTTP_201_CREATED
-    event_id = response.json()["_id"]
+    event_id = response.json()["id"]
     
     # Get the specific event
     response = client.get(f"/events/{event_id}")
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     assert data["title"] == sample_event["title"]
-    assert data["_id"] == event_id
+    assert data["id"] == event_id
 
 
 @pytest.mark.asyncio
@@ -45,11 +45,11 @@ async def test_update_event(client, mock_db, sample_event):
     # Create a test event first
     response = client.post("/events/", json=sample_event)
     assert response.status_code == status.HTTP_201_CREATED
-    event_id = response.json()["_id"]
+    event_id = response.json()["id"]
     
     # Update the event
     updated_data = {"title": "Updated Test Event"}
-    response = client.put(f"/events/{event_id}", json=updated_data)
+    response = client.patch(f"/events/{event_id}", json=updated_data)
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     assert data["title"] == "Updated Test Event"

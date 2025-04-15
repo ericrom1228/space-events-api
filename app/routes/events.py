@@ -42,7 +42,7 @@ async def create_event(event: EventCreate, db: AsyncIOMotorDatabase = Depends(ge
 
 
 # Get all events
-@router.get("/", response_model=List[EventDB])
+@router.get("/", response_model=List[EventDB], status_code=200)
 async def get_events(db: AsyncIOMotorDatabase = Depends(get_database)):
     events_cursor = db["events"].find()
     events = await events_cursor.to_list(length=100)
@@ -50,7 +50,7 @@ async def get_events(db: AsyncIOMotorDatabase = Depends(get_database)):
 
 
 # Get a single event by ID
-@router.get("/{event_id}", response_model=EventDB)
+@router.get("/{event_id}", response_model=EventDB, status_code=200)
 async def get_event(event_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
     try:
         event = await db["events"].find_one({"_id": ObjectId(event_id)})
@@ -67,10 +67,10 @@ async def get_event(event_id: str, db: AsyncIOMotorDatabase = Depends(get_databa
 
 
 # Update an event by ID
-@router.put("/{event_id}", response_model=EventDB)
+@router.patch("/{event_id}", response_model=EventDB, status_code=200)
 async def update_event(event_id: str, event_update: EventUpdate, db: AsyncIOMotorDatabase = Depends(get_database)):
-    update_data = event_update.dict(exclude_unset=True)
-    update_data["updated_at"] = datetime.utcnow()
+    update_data = event_update.model_dump(exclude_unset=True)
+    update_data["updated_at"] = datetime.now(UTC)
 
     result = await db["events"].find_one_and_update(
         {"_id": ObjectId(event_id)},
@@ -85,7 +85,7 @@ async def update_event(event_id: str, event_update: EventUpdate, db: AsyncIOMoto
 
 
 # Delete an event by ID
-@router.delete("/{event_id}", response_model=dict)
+@router.delete("/{event_id}", response_model=dict, status_code=200)
 async def delete_event(event_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
     result = await db["events"].find_one_and_delete({"_id": ObjectId(event_id)})
 
