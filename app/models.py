@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, HttpUrl, field_serializer
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_serializer
 from datetime import datetime
 from typing import List, Optional
 
@@ -49,6 +49,8 @@ class EventDB(EventBase):
     created_at: datetime = Field(default_factory=datetime.utcnow)  # Timestamp when the event was created
     updated_at: datetime = Field(default_factory=datetime.utcnow)  # Timestamp of the last update
 
-    class Config:
-        from_attributes = True  # Enables ORM-style access
-        json_encoders = {datetime: lambda v: v.isoformat()}  # Ensures datetime fields are serialized properly
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_serializer("created_at", "updated_at")
+    def serialize_datetimes(self, dt: datetime, _info):
+        return dt.isoformat()
