@@ -89,7 +89,7 @@ async def update_event(event_id: str, event_update: EventUpdate, db: AsyncIOMoto
 async def delete_event(event_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
     result = await db["events"].find_one_and_delete({"_id": ObjectId(event_id)})
 
-    if result.deleted_count == 0:
+    if not result:
         raise HTTPException(status_code=404, detail="Event not found")
 
     return {"message": "Event deleted successfully"}

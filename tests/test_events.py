@@ -61,11 +61,11 @@ async def test_delete_event(client, mock_db, sample_event):
     # Create a test event first
     response = client.post("/events/", json=sample_event)
     assert response.status_code == status.HTTP_201_CREATED
-    event_id = response.json()["_id"]
+    event_id = response.json()["id"]
     
     # Delete the event
     response = client.delete(f"/events/{event_id}")
-    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert response.status_code == status.HTTP_200_OK
     
     # Verify event is deleted
     response = client.get(f"/events/{event_id}")
