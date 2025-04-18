@@ -1,10 +1,12 @@
 import bson
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from datetime import datetime, UTC
+from motor.motor_asyncio import AsyncIOMotorDatabase
 from bson import ObjectId
-from app.database import events_collection
 from app.models import EventCreate, EventDB, EventUpdate
+from app.dependencies import get_database
+from fastapi.encoders import jsonable_encoder
 
 router = APIRouter()
 
@@ -28,34 +30,30 @@ def event_helper(event) -> EventDB:
 
 
 # Create an event
-@router.post("", response_model=EventDB)
-async def create_event(event: EventCreate):
-    # new_event = event.dict()
+@router.post("/", response_model=EventDB, status_code=201)
+async def create_event(event: EventCreate, db: AsyncIOMotorDatabase = Depends(get_database)):
     new_event = event.model_dump()
     new_event["created_at"] = datetime.now(UTC)
     new_event["updated_at"] = datetime.now(UTC)
-
-    # print("new_event:", new_event)
-    result = await events_collection.insert_one(new_event)
-    new_event["id"] = result.inserted_id
-
+    event_dict = jsonable_encoder(new_event)
+    result = await db["events"].insert_one(event_dict)
+    new_event["_id"] = result.inserted_id
     return event_helper(new_event)
 
 
 # Get all events
-@router.get("", response_model=List[EventDB])
-async def get_events():
-    events_cursor = events_collection.find()
+@router.get("/", response_model=List[EventDB], status_code=200)
+async def get_events(db: AsyncIOMotorDatabase = Depends(get_database)):
+    events_cursor = db["events"].find()
     events = await events_cursor.to_list(length=100)
-
     return [event_helper(event) for event in events]
 
 
 # Get a single event by ID
-@router.get("/{event_id}", response_model=EventDB)
-async def get_event(event_id: str):
+@router.get("/{event_id}", response_model=EventDB, status_code=200)
+async def get_event(event_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
     try:
-        event = await events_collection.find_one({"_id": ObjectId(event_id)})
+        event = await db["events"].find_one({"_id": ObjectId(event_id)})
     except bson.errors.InvalidId as e:
         raise HTTPException(
             status_code=400,
@@ -69,12 +67,12 @@ async def get_event(event_id: str):
 
 
 # Update an event by ID
-@router.put("/{event_id}", response_model=EventDB)
-async def update_event(event_id: str, event_update: EventUpdate):
-    update_data = event_update.dict(exclude_unset=True)
-    update_data["updated_at"] = datetime.utcnow()
+@router.patch("/{event_id}", response_model=EventDB, status_code=200)
+async def update_event(event_id: str, event_update: EventUpdate, db: AsyncIOMotorDatabase = Depends(get_database)):
+    update_data = event_update.model_dump(exclude_unset=True)
+    update_data["updated_at"] = datetime.now(UTC)
 
-    result = await events_collection.find_one_and_update(
+    result = await db["events"].find_one_and_update(
         {"_id": ObjectId(event_id)},
         {"$set": update_data},
         return_document=True
@@ -87,11 +85,11 @@ async def update_event(event_id: str, event_update: EventUpdate):
 
 
 # Delete an event by ID
-@router.delete("/{event_id}", response_model=dict)
-async def delete_event(event_id: str):
-    result = await events_collection.delete_one({"_id": ObjectId(event_id)})
+@router.delete("/{event_id}", response_model=dict, status_code=200)
+async def delete_event(event_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
+    result = await db["events"].find_one_and_delete({"_id": ObjectId(event_id)})
 
-    if result.deleted_count == 0:
+    if not result:
         raise HTTPException(status_code=404, detail="Event not found")
 
     return {"message": "Event deleted successfully"}

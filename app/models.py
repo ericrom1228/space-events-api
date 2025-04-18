@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field, HttpUrl, field_serializer
-from datetime import datetime
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_serializer
+from datetime import datetime, UTC
 from typing import List, Optional
 
 
@@ -8,12 +8,16 @@ class Media(BaseModel):
     images: List[HttpUrl] = []  # List of image URLs
     videos: List[HttpUrl] = []  # List of video URLs
 
+    @field_serializer("images", "videos")
+    def serialize_urls(self, value):
+        return [str(url) for url in value]
+
 
 # Base model for an event, containing common fields
 class EventBase(BaseModel):
     title: str = Field(..., title="Event Title", max_length=255)  # Event title (required)
     description: Optional[str] = Field(None, title="Event Description")  # Optional description
-    date: datetime = Field(..., title="Event Date")  # Date of the event
+    date: datetime = Field(..., title="Event Date")  # Date of the event (required)
     type: Optional[str] = Field(None, title="Event Type", max_length=100)  # Optional event type
     location: Optional[str] = Field(None, title="Event Location", max_length=255)  # Optional location
     source: Optional[HttpUrl] = Field(None, title="Source URL")  # Optional source link
@@ -36,15 +40,19 @@ class EventCreate(EventBase):
 
 # Model for updating an existing event
 class EventUpdate(EventBase):
-    updated_at: datetime = Field(default_factory=datetime.utcnow)  # Timestamp of the last update
+    title: Optional[str] = Field(None, title="Event Title", max_length=255)  # Event title (required)
+    date: Optional[datetime] = Field(None, title="Event Date")  # Date of the event
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))  # Timestamp of the last update
 
 
 # Model for an event stored in the database
 class EventDB(EventBase):
     id: str
-    created_at: datetime = Field(default_factory=datetime.utcnow)  # Timestamp when the event was created
-    updated_at: datetime = Field(default_factory=datetime.utcnow)  # Timestamp of the last update
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))  # Timestamp when the event was created
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))  # Timestamp of the last update
 
-    class Config:
-        from_attributes = True  # Enables ORM-style access
-        json_encoders = {datetime: lambda v: v.isoformat()}  # Ensures datetime fields are serialized properly
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_serializer("created_at", "updated_at")
+    def serialize_datetimes(self, dt: datetime, _info):
+        return dt.isoformat()
