@@ -1,5 +1,5 @@
 import pytest
-from datetime import datetime
+from datetime import datetime, UTC
 from app.models import EventBase, Media
 from pydantic import HttpUrl
 
@@ -13,7 +13,7 @@ def test_event_model_valid():
     event_data = {
         "title": "Test Event",
         "description": "Test Description",
-        "date": datetime.utcnow(),
+        "date": datetime.now(UTC),
         "type": "Test",
         "location": "Test Location",
         "source": "https://test.com",
@@ -33,7 +33,7 @@ def test_event_model_valid():
 def test_event_model_minimal():
     event_data = {
         "title": "Test Event",
-        "date": datetime.utcnow()
+        "date": datetime.now(UTC)
     }
     event = EventBase(**event_data)
     assert event.title == event_data["title"]
