@@ -1,6 +1,6 @@
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_serializer
 from datetime import datetime, UTC
 from typing import List, Optional
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_serializer
 
 
 # Model for storing media-related URLs
