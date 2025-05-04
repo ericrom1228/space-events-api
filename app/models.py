@@ -1,58 +1,99 @@
+"""Models/Schemas for events"""
 from datetime import datetime, UTC
 from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_serializer
+from utils.serializers import serialize_httpurls
 
 
-# Model for storing media-related URLs
 class Media(BaseModel):
+    """
+    Model for storing media-related URLs
+    """
     images: List[HttpUrl] = []  # List of image URLs
     videos: List[HttpUrl] = []  # List of video URLs
 
     @field_serializer("images", "videos")
-    def serialize_urls(self, value):
-        return [str(url) for url in value]
+    def _serialize_urls(self, urls):
+        return serialize_httpurls(urls)
 
 
-# Base model for an event, containing common fields
 class EventBase(BaseModel):
-    title: str = Field(..., title="Event Title", max_length=255)  # Event title (required)
-    description: Optional[str] = Field(None, title="Event Description")  # Optional description
-    date: datetime = Field(..., title="Event Date")  # Date of the event (required)
-    type: Optional[str] = Field(None, title="Event Type", max_length=100)  # Optional event type
-    location: Optional[str] = Field(None, title="Event Location", max_length=255)  # Optional location
-    source: Optional[HttpUrl] = Field(None, title="Source URL")  # Optional source link
-    related_links: List[HttpUrl] = []  # List of related URLs
-    tags: List[str] = []  # List of associated tags
-    media: Optional[Media] = None  # Optional media containing images and videos
+    """
+    Base model for an event, containing common fields
+    """
+    title: str = Field(
+        ...,
+        title="Event Title",
+        max_length=255
+    )
+    description: Optional[str] = Field(
+        None,
+        title="Event Description"
+    )
+    date: datetime = Field(
+        ...,
+        title="Event Date"
+    )
+    type: Optional[str] = Field(
+        None, title="Event Type",
+        max_length=100
+    )
+    location: Optional[str] = Field(
+        None, title="Event Location",
+        max_length=255
+    )
+    source: Optional[HttpUrl] = Field(
+        None,
+        title="Source URL"
+    )
+    related_links: List[HttpUrl] = []
+    tags: List[str] = []
+    media: Optional[Media] = None
 
     # Convert HttpUrl fields to plain strings before storing in MongoDB
     @field_serializer("source", "related_links")
-    def serialize_url(self, value):
-        if isinstance(value, list):
-            return [str(url) for url in value]
-        return str(value) if value else None
+    def _serialize_urls(self, urls):
+        return serialize_httpurls(urls)
 
 
-# Model for creating a new event, inheriting from EventBase
 class EventCreate(EventBase):
-    pass  # No additional fields needed beyond EventBase
+    """
+    Model for creating a new event, inheriting from EventBase
+    """
 
 
-# Model for updating an existing event
 class EventUpdate(EventBase):
-    title: Optional[str] = Field(None, title="Event Title", max_length=255)  # Event title (required)
-    date: Optional[datetime] = Field(None, title="Event Date")  # Date of the event
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))  # Timestamp of the last update
+    """
+    Model for updating an existing event
+    """
+    title: Optional[str] = Field(
+        None,
+        title="Event Title",
+        max_length=255
+    )
+    date: Optional[datetime] = Field(
+        None,
+        title="Event Date"
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC)
+    )
 
 
-# Model for an event stored in the database
 class EventDB(EventBase):
+    """
+    Model for an event stored in the database
+    """
     id: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))  # Timestamp when the event was created
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))  # Timestamp of the last update
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC)
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC)
+    )
 
     model_config = ConfigDict(from_attributes=True)
 
     @field_serializer("created_at", "updated_at")
-    def serialize_datetimes(self, dt: datetime, _info):
+    def _serialize_datetimes(self, dt: datetime, _info):
         return dt.isoformat()
