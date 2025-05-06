@@ -1,3 +1,4 @@
+"""Module to set up configurations for tests"""
 import pytest
 from fastapi.testclient import TestClient
 from mongomock_motor import AsyncMongoMockClient
@@ -7,23 +8,25 @@ from app.dependencies import get_database
 
 @pytest.fixture
 def app_mock():
+    """Fixture to set up app mock"""
     return app
 
 
 @pytest.fixture
 def client():
+    """Fixture to set up HTTP test client"""
     return TestClient(app)
 
 
 @pytest.fixture
 async def mock_db():
-    client = AsyncMongoMockClient()
-    db = client['test_space_events']
-    
-    # Override the dependency
+    """Fixture to set up the connection to the mock mongo"""
+    mongo_client = AsyncMongoMockClient()
+    db = mongo_client['test_space_events']
+
     async def override_get_db():
         return db
-    
+
     app.dependency_overrides[get_database] = override_get_db
     yield db
     app.dependency_overrides.clear()
@@ -31,6 +34,7 @@ async def mock_db():
 
 @pytest.fixture
 def sample_event():
+    """Fixture for event sample data"""
     return {
         "title": "Test Space Event",
         "description": "This is a test space event",
