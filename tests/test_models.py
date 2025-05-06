@@ -1,15 +1,12 @@
-import pytest
+"""Tests for models.py"""
 from datetime import datetime, UTC
-from app.models import EventBase, Media
+import pytest
 from pydantic import HttpUrl
-
-
-def test_debugging():
-    x = 42
-    assert x == 42
+from app.models import EventBase, Media
 
 
 def test_event_model_valid():
+    """Test EventBase model valid"""
     event_data = {
         "title": "Test Event",
         "description": "Test Description",
@@ -31,6 +28,7 @@ def test_event_model_valid():
 
 
 def test_event_model_minimal():
+    """Test EventBase with minimal required fields"""
     event_data = {
         "title": "Test Event",
         "date": datetime.now(UTC)
@@ -38,16 +36,18 @@ def test_event_model_minimal():
     event = EventBase(**event_data)
     assert event.title == event_data["title"]
     assert event.description is None
-    assert event.tags == []
+    assert not event.tags
     assert event.media is None
 
 
 def test_event_model_invalid_date():
+    """Test EventBase with invalid date"""
     with pytest.raises(ValueError):
         EventBase(title="Test Event", date="invalid-date")
 
 
 def test_media_model():
+    """Test Media model"""
     media_data = {
         "images": ["https://test.com/image1.jpg", "https://test.com/image2.jpg"],
         "videos": ["https://test.com/video1.mp4"]
