@@ -13,8 +13,9 @@ async def test_create_event(client, mock_db, sample_event):
 
 
 @pytest.mark.asyncio
-async def test_get_events(client, sample_event):
+async def test_get_events(client, mock_db, sample_event):
     """Test getting all events"""
+    assert await mock_db['events'].count_documents({}) == 0
     response = client.post("/events", json=sample_event)
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -27,8 +28,9 @@ async def test_get_events(client, sample_event):
 
 
 @pytest.mark.asyncio
-async def test_get_event(client, sample_event):
+async def test_get_event(client, mock_db, sample_event):
     """Test getting a single event"""
+    assert await mock_db['events'].count_documents({}) == 0
     response = client.post("/events", json=sample_event)
     assert response.status_code == status.HTTP_201_CREATED
     event_id = response.json()["id"]
@@ -41,8 +43,9 @@ async def test_get_event(client, sample_event):
 
 
 @pytest.mark.asyncio
-async def test_update_event(client, sample_event):
+async def test_update_event(client, mock_db, sample_event):
     """Test updating (patching) an event"""
+    assert await mock_db['events'].count_documents({}) == 0
     response = client.post("/events", json=sample_event)
     assert response.status_code == status.HTTP_201_CREATED
     event_id = response.json()["id"]
@@ -56,8 +59,9 @@ async def test_update_event(client, sample_event):
 
 
 @pytest.mark.asyncio
-async def test_delete_event(client, sample_event):
+async def test_delete_event(client, mock_db, sample_event):
     """Test deleting an event"""
+    assert await mock_db['events'].count_documents({}) == 0
     response = client.post("/events/", json=sample_event)
     assert response.status_code == status.HTTP_201_CREATED
     event_id = response.json()["id"]
@@ -70,18 +74,20 @@ async def test_delete_event(client, sample_event):
 
 
 @pytest.mark.asyncio
-async def test_get_nonexistent_event(client):
+async def test_get_nonexistent_event(client, mock_db):
     """Test correct response for getting an event that
     doesn't exist
     """
+    assert await mock_db['events'].count_documents({}) == 0
     nonexistent_id = str(ObjectId())
     response = client.get(f"/events/{nonexistent_id}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 @pytest.mark.asyncio
-async def test_create_event_invalid_data(client):
+async def test_create_event_invalid_data(client, mock_db):
     """Test creating an event"""
+    assert await mock_db['events'].count_documents({}) == 0
     invalid_event = {
         "title": "",  # Empty title should be invalid
         "date": "invalid-date"  # Invalid date format
