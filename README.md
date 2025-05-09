@@ -6,20 +6,23 @@ Space Events API is a FastAPI-based project designed to provide a historical arc
 ## Project Structure
 ```
 space-events-api/
-│── app/
-│   ├── main.py               # Entry point for FastAPI
-│   ├── settings.py           # pydantic-settings (reads in from .env file)
-│   ├── dependencies.py       # App dependencies
-│   ├── models.py             # Event schema/model
-│   ├── routes/
-│   │   ├── events.py         # API routes for events
-│── tests
-│   │—— conftest.py           # configure pytests
-│   │── test_models.py        # tests event schemas/models
-│   │── test_events.py        # tests API routs for events
-│── requirements.txt          # Dependencies
-│── .env                      # Environment variables
-│── README.md                 # Project documentation
++-- app/
+|   +-- main.py               # Entry point for FastAPI
+|   +-- settings.py           # pydantic-settings (reads in from .env file)
+|   +-- dependencies.py       # App dependencies
+|   +-- models.py             # Event schema/model
+|   +-- routes/
+|   |   +-- events.py         # API routes for events
++-- tests/
+|   +-- conftest.py           # configure pytests
+|   +-- test_models.py        # tests event schemas/models
+|   +-- test_events.py        # tests API routs for events
+|   +-- postman/              # Postman files
++-- utils/                    # utilities
+|   +-- serializers.py        # common serializers for models
++-- requirements.txt          # Dependencies
++-- .env                      # Environment variables
++-- README.md                 # Project documentation
 ```
 
 ## Installation
