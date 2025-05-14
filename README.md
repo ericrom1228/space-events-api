@@ -49,7 +49,7 @@ variables in the environment file.
 
 2. Run FastAPI with Uvicorn:
 ```sh
-uvicorn app.main:app --host 0.0.0.0 --port 3001 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 3001
 ```
 
 The API will be available at:
