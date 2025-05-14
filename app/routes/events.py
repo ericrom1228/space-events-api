@@ -44,8 +44,9 @@ async def create_event(event: EventCreate, db: AsyncIOMotorDatabase = Depends(ge
     :return:
     """
     new_event = event.model_dump()
-    new_event["created_at"] = datetime.now(UTC)
-    new_event["updated_at"] = datetime.now(UTC)
+    now = datetime.now(UTC)
+    new_event["created_at"] = now
+    new_event["updated_at"] = now
     event_dict = encoders.jsonable_encoder(new_event)
     result = await db["events"].insert_one(event_dict)
     new_event["_id"] = result.inserted_id

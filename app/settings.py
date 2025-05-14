@@ -18,6 +18,7 @@ class Settings(BaseSettings):
 
     # Database
     MONGO_URI: str = "mongodb://localhost:27017"
+    MONGO_CONNECTION_TIMEOUT: int = 3000
     DB_NAME: str = "space_db"
 
     # Build information
