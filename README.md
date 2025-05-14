@@ -13,13 +13,13 @@ space-events-api/
 |   +-- models.py             # Event schema/model
 |   +-- routes/
 |   |   +-- events.py         # API routes for events
+|   +-- utils/                # utilities
+|       +-- serializers.py    # common serializers for models
 +-- tests/
 |   +-- conftest.py           # configure pytests
 |   +-- test_models.py        # tests event schemas/models
 |   +-- test_events.py        # tests API routs for events
 |   +-- postman/              # Postman files
-+-- utils/                    # utilities
-|   +-- serializers.py        # common serializers for models
 +-- requirements.txt          # Dependencies
 +-- .env                      # Environment variables
 +-- README.md                 # Project documentation
