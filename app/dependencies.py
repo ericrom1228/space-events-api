@@ -12,11 +12,14 @@ print("DB_NAME:", settings.DB_NAME)
 async def connect_to_mongo(app: FastAPI) -> None:
     """Establishes connection to Mongo"""
     try:
-        app.state.mongo_client = AsyncIOMotorClient(settings.MONGO_URI, serverSelectionTimeoutMS=settings.MONGO_CONNECTION_TIMEOUT)
+        app.state.mongo_client = AsyncIOMotorClient(
+            settings.MONGO_URI,
+            serverSelectionTimeoutMS=settings.MONGO_CONNECTION_TIMEOUT
+        )
         await app.state.mongo_client.admin.command('ping')
 
-    except ServerSelectionTimeoutError:
-        raise
+    except ServerSelectionTimeoutError as e:
+        raise RuntimeError(f"Could not connect to MongoDB: {e}") from e
 
 
 async def close_mongo_connection(app: FastAPI) -> None:
