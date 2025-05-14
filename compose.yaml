@@ -1,0 +1,32 @@
+services:
+  mongo:
+    image: mongo:8.0
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - space-events-net
+
+  space-events-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: space-events-api
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongo
+    environment:
+      MONGO_URI: mongodb://mongo:27017
+    networks:
+      - space-events-net
+
+volumes:
+  mongo_data:
+
+networks:
+  space-events-net:
+    driver: bridge
