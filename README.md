@@ -13,13 +13,13 @@ space-events-api/
 |   +-- models.py             # Event schema/model
 |   +-- routes/
 |   |   +-- events.py         # API routes for events
+|   +-- utils/                # utilities
+|       +-- serializers.py    # common serializers for models
 +-- tests/
 |   +-- conftest.py           # configure pytests
 |   +-- test_models.py        # tests event schemas/models
 |   +-- test_events.py        # tests API routs for events
 |   +-- postman/              # Postman files
-+-- utils/                    # utilities
-|   +-- serializers.py        # common serializers for models
 +-- requirements.txt          # Dependencies
 +-- .env                      # Environment variables
 +-- README.md                 # Project documentation
@@ -44,12 +44,19 @@ the default variables.
 3. **Environment variables:** can be set directly in the shell. The variables set directly in the environment override the 
 variables in the environment file.
 
-## Running the API
+## Run
+### Local
 1. Make sure MongoDB is running and accessible at localhost:27017
-
 2. Run FastAPI with Uvicorn:
 ```sh
 uvicorn app.main:app --host 0.0.0.0 --port 3001
+```
+
+### Docker Compose
+Included in the repository is a Dockerfile for building the API and a compose.yaml for spinning up the API
+and it's backing MongoDB (both in containers). To start the program do:
+```
+docker compose up --build -d
 ```
 
 The API will be available at:
