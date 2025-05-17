@@ -1,0 +1,35 @@
+# Docs: https://docs.python.org/3/howto/logging.html#advanced-logging-tutorial
+version: 1
+disable_existing_loggers: False
+
+formatters:
+  default:
+    format: "%(asctime)s | %(levelname)s | %(filename)s:%(lineno)d | %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG  # Default to DEBUG or get this from environment settings
+    formatter: default
+    stream: ext://sys.stdout
+
+  file:
+    class: logging.FileHandler
+    level: INFO  # Default to DEBUG or get this from environment settings
+    formatter: default
+    filename: "app.log"  # Define the log file name or get this from a setting
+
+root:
+  level: INFO  # Set the root logging level, can be overridden by other loggers
+  handlers:
+    - console
+    - file
+
+loggers:
+  app:
+    level: INFO  # Set a specific logger level if necessary
+    handlers:
+      - console
+      - file
+    propagate: no

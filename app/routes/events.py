@@ -2,11 +2,15 @@
 from typing import List
 from datetime import datetime, UTC
 import bson
+import logging
 from fastapi import APIRouter, HTTPException, Depends, encoders
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from bson import ObjectId
 from app.models import EventCreate, EventDB, EventUpdate
 from app.dependencies import get_database
+from app.settings import settings
+
+logger = logging.getLogger("app")
 
 router = APIRouter()
 
@@ -38,11 +42,8 @@ def event_helper(event: dict) -> EventDB:
 async def create_event(event: EventCreate, db: AsyncIOMotorDatabase = Depends(get_database)):
     """
     Create a new event in the database.
-
-    :param event: Event to create
-    :param db:
-    :return:
     """
+    logger.info("Creating new event")
     new_event = event.model_dump()
     now = datetime.now(UTC)
     new_event["created_at"] = now
@@ -50,6 +51,8 @@ async def create_event(event: EventCreate, db: AsyncIOMotorDatabase = Depends(ge
     event_dict = encoders.jsonable_encoder(new_event)
     result = await db["events"].insert_one(event_dict)
     new_event["_id"] = result.inserted_id
+    logger.info(f"New Event: {new_event} "
+                f"inserted in database: {settings.DB_NAME}, collection 'events'")
     return event_helper(new_event)
 
 
@@ -57,10 +60,7 @@ async def create_event(event: EventCreate, db: AsyncIOMotorDatabase = Depends(ge
 @router.get("/", response_model=List[EventDB], status_code=200)
 async def get_events(db: AsyncIOMotorDatabase = Depends(get_database)) -> List[EventDB]:
     """
-    Get all events in the database
-
-    :param db: database from dependencies
-    :return: List of events
+    Get all events in the database.
     """
     events_cursor = db["events"].find()
     events = await events_cursor.to_list(length=100)
@@ -72,10 +72,6 @@ async def get_events(db: AsyncIOMotorDatabase = Depends(get_database)) -> List[E
 async def get_event(event_id: str, db: AsyncIOMotorDatabase = Depends(get_database)) -> EventDB:
     """
     Get an event by id.
-
-    :param event_id: event id
-    :param db: database from dependencies
-    :return: event
     """
     try:
         event = await db["events"].find_one({"_id": ObjectId(event_id)})
@@ -101,11 +97,6 @@ async def update_event(
 ) -> EventDB:
     """
     Update an event by id.
-
-    :param event_id: id of the event
-    :param event_update: Requested change of the event
-    :param db: database from dependencies
-    :return: updated event
     """
     update_data = event_update.model_dump(exclude_unset=True)
     update_data["updated_at"] = datetime.now(UTC)
@@ -126,11 +117,7 @@ async def update_event(
 @router.delete("/{event_id}", response_model=dict, status_code=200)
 async def delete_event(event_id: str, db: AsyncIOMotorDatabase = Depends(get_database)) -> dict:
     """
-    Delete an event by id
-
-    :param event_id: id of the event to delete
-    :param db: database from dependencies
-    :return: dictionary describing successful deletion of event
+    Delete an event by id.
     """
     result = await db["events"].find_one_and_delete({"_id": ObjectId(event_id)})
 
