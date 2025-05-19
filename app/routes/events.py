@@ -4,6 +4,7 @@ from datetime import datetime, UTC
 import bson
 import logging
 from fastapi import APIRouter, HTTPException, Depends, encoders
+from pydantic import ValidationError
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from bson import ObjectId
 from app.models import EventCreate, EventDB, EventUpdate
@@ -21,23 +22,26 @@ def event_helper(event: dict) -> EventDB:
     :param event: MongoDB document
     :return: Pydantic EventDB model
     """
-    return EventDB(
-        id=str(event["_id"]),
-        title=event["title"],
-        description=event.get("description"),
-        date=event["date"],
-        type=event.get("type"),
-        location=event.get("location"),
-        source=event.get("source"),
-        related_links=event.get("related_links", []),
-        tags=event.get("tags", []),
-        media=event.get("media"),
-        created_at=event["created_at"],
-        updated_at=event["updated_at"]
-    )
+    try:
+        return EventDB(
+            id=str(event["_id"]),
+            title=event["title"],
+            description=event.get("description"),
+            date=event["date"],
+            type=event.get("type"),
+            location=event.get("location"),
+            source=event.get("source"),
+            related_links=event.get("related_links", []),
+            tags=event.get("tags", []),
+            media=event.get("media"),
+            created_at=event["created_at"],
+            updated_at=event["updated_at"]
+        )
+    except ValidationError as e:
+        logger.error("Model validation failed: %s", e.json())
+        raise
 
 
-# Create an event
 @router.post("/", response_model=EventDB, status_code=201)
 async def create_event(event: EventCreate, db: AsyncIOMotorDatabase = Depends(get_database)):
     """
@@ -51,12 +55,10 @@ async def create_event(event: EventCreate, db: AsyncIOMotorDatabase = Depends(ge
     event_dict = encoders.jsonable_encoder(new_event)
     result = await db["events"].insert_one(event_dict)
     new_event["_id"] = result.inserted_id
-    logger.info(f"New Event: {new_event} "
-                f"inserted in database: {settings.DB_NAME}, collection 'events'")
+    logger.info("New Event: %s inserted in database: %s, collection: events", new_event, settings.DB_NAME)
     return event_helper(new_event)
 
 
-# Get all events
 @router.get("/", response_model=List[EventDB], status_code=200)
 async def get_events(db: AsyncIOMotorDatabase = Depends(get_database)) -> List[EventDB]:
     """
@@ -67,7 +69,6 @@ async def get_events(db: AsyncIOMotorDatabase = Depends(get_database)) -> List[E
     return [event_helper(event) for event in events]
 
 
-# Get a single event by ID
 @router.get("/{event_id}", response_model=EventDB, status_code=200)
 async def get_event(event_id: str, db: AsyncIOMotorDatabase = Depends(get_database)) -> EventDB:
     """
@@ -88,7 +89,6 @@ async def get_event(event_id: str, db: AsyncIOMotorDatabase = Depends(get_databa
     return event_helper(event)
 
 
-# Update an event by ID
 @router.patch("/{event_id}", response_model=EventDB, status_code=200)
 async def update_event(
         event_id: str,
@@ -113,7 +113,6 @@ async def update_event(
     return event_helper(result)
 
 
-# Delete an event by ID
 @router.delete("/{event_id}", response_model=dict, status_code=200)
 async def delete_event(event_id: str, db: AsyncIOMotorDatabase = Depends(get_database)) -> dict:
     """

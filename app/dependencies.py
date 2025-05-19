@@ -8,16 +8,16 @@ from app.settings import settings
 logger = logging.getLogger("app")
 
 # MongoDB's connection settings
-logger.info("MONGO_URI: %s" % settings.MONGO_URI)
-logger.info("DB_NAME: %s" % settings.DB_NAME)
+logger.info("MONGO_URI: %s", settings.MONGO_URI)
+logger.info("DB_NAME: %s", settings.DB_NAME)
 
 
 async def connect_to_mongo(app: FastAPI) -> None:
     """Establishes connection to Mongo"""
     try:
-        logger.info(f"MONGO_URI: {settings.MONGO_URI}")
-        logger.info(f"DB_NAME: %s {settings.DB_NAME}")
-        logger.info(f"MONGO_CONNECTION_TIMEOUT: {settings.MONGO_CONNECTION_TIMEOUT} milliseconds")
+        logger.info("MONGO_URI: %s",  settings.MONGO_URI)
+        logger.info("DB_NAME: %s", settings.DB_NAME)
+        logger.info("MONGO_CONNECTION_TIMEOUT: %s milliseconds", settings.MONGO_CONNECTION_TIMEOUT)
         app.state.mongo_client = AsyncIOMotorClient(
             settings.MONGO_URI,
             serverSelectionTimeoutMS=settings.MONGO_CONNECTION_TIMEOUT

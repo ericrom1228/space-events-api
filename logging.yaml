@@ -33,3 +33,18 @@ loggers:
       - console
       - file
     propagate: no
+
+  uvicorn:
+    level: INFO
+    handlers: [console]
+    propagate: False
+
+  uvicorn.error:
+    level: INFO
+    handlers: [console]
+    propagate: False
+
+  uvicorn.access:
+    level: INFO
+    handlers: [console]
+    propagate: False
