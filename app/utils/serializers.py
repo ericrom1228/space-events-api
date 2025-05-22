@@ -1,4 +1,6 @@
 """Common serialization functions."""
+
+
 def serialize_httpurls(urls: str | list[str]) -> list[str] | str | None:
     """
     Serialize http urls to strings

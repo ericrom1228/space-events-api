@@ -1,8 +1,11 @@
 """Models/Schemas for events"""
 from datetime import datetime, UTC
+import logging
 from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_serializer
 from app.utils.serializers import serialize_httpurls
+
+logger = logging.getLogger("app")
 
 
 class Media(BaseModel):
