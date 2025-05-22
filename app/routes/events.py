@@ -1,10 +1,9 @@
 """Routes and CRUD operations for events endpoints."""
 from typing import List
 from datetime import datetime, UTC
-import bson
 import logging
+import bson
 from fastapi import APIRouter, HTTPException, Depends, encoders
-from pydantic import ValidationError
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from bson import ObjectId
 from app.models import EventCreate, EventDB, EventUpdate
@@ -22,24 +21,20 @@ def event_helper(event: dict) -> EventDB:
     :param event: MongoDB document
     :return: Pydantic EventDB model
     """
-    try:
-        return EventDB(
-            id=str(event["_id"]),
-            title=event["title"],
-            description=event.get("description"),
-            date=event["date"],
-            type=event.get("type"),
-            location=event.get("location"),
-            source=event.get("source"),
-            related_links=event.get("related_links", []),
-            tags=event.get("tags", []),
-            media=event.get("media"),
-            created_at=event["created_at"],
-            updated_at=event["updated_at"]
-        )
-    except ValidationError as e:
-        logger.error("Model validation failed: %s", e.json())
-        raise
+    return EventDB(
+        id=str(event["_id"]),
+        title=event["title"],
+        description=event.get("description"),
+        date=event["date"],
+        type=event.get("type"),
+        location=event.get("location"),
+        source=event.get("source"),
+        related_links=event.get("related_links", []),
+        tags=event.get("tags", []),
+        media=event.get("media"),
+        created_at=event["created_at"],
+        updated_at=event["updated_at"]
+    )
 
 
 @router.post("/", response_model=EventDB, status_code=201)
@@ -55,7 +50,11 @@ async def create_event(event: EventCreate, db: AsyncIOMotorDatabase = Depends(ge
     event_dict = encoders.jsonable_encoder(new_event)
     result = await db["events"].insert_one(event_dict)
     new_event["_id"] = result.inserted_id
-    logger.info("New Event: %s inserted in database: %s, collection: events", new_event, settings.DB_NAME)
+    logger.info(
+        "New Event: %s inserted in database: %s, collection: events",
+        new_event,
+        settings.DB_NAME
+    )
     return event_helper(new_event)
 
 

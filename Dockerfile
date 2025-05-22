@@ -9,9 +9,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN addgroup --system appuser && \
     adduser --system --ingroup appuser appuser
 
-# Set working directory
-WORKDIR /app
-
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
 #    build-essential \
@@ -19,13 +16,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 #    curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Set working directory
+WORKDIR /app
+
 # Install Python dependencies early to cache them
 COPY requirements.txt .
+COPY logging.yaml .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY . .
+COPY app app
+
+# Give ownership of /app directory to appuser
+RUN chown -R appuser:appuser /app
 
 # Switch to non-root user
 USER appuser

@@ -1,3 +1,4 @@
+"""Load in logging configuration"""
 import logging.config
 import yaml
 from app.settings import settings  # Assuming settings are defined here
@@ -5,7 +6,7 @@ from app.settings import settings  # Assuming settings are defined here
 
 def get_logging_config() -> dict:
     """Load logging configuration from the YAML file."""
-    with open("logging.yaml", "r") as f:
+    with open("logging.yaml", mode="r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     # Optionally, you can modify the config based on settings or environment variables

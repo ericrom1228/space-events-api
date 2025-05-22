@@ -1,8 +1,12 @@
 """Main entry point for the application."""
 from contextlib import asynccontextmanager
 import logging
-from fastapi import FastAPI
+import traceback
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, PlainTextResponse
+from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 from app.logging_config import configure_logging
 from app.routes import events
 from app.settings import settings
@@ -34,6 +38,27 @@ app = FastAPI(
 )
 
 
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Log 422 pydantic validation exceptions"""
+    logger.error(
+        "Validation error at %s: %s",
+        request.url,
+        exc.errors()
+    )
+    return JSONResponse(
+        status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"detail": exc.errors()}
+    )
+
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(exc: Exception):
+    """Log all generic exceptions"""
+    logger.error("Unhandled exception: %s\n%s", exc, traceback.format_exc())
+    return PlainTextResponse("Internal server error", status_code=500)
+
+
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
@@ -50,7 +75,6 @@ app.include_router(events.router, prefix="/events", tags=["events"])
 @app.get("/", tags=["root"])
 async def read_root():
     """Get the root route."""
-    logger.info("GET /")
     return {
         "message": "Welcome to the Space Events API",
         "docs": "/docs",
@@ -62,7 +86,6 @@ async def read_root():
 @app.get("/about", tags=["admin"])
 async def read_about():
     """Get the information about the API."""
-    logger.info("GET /about")
     return {
         "name": "Space Events API",
         "description": "API for managing space-related events and historical data",
@@ -77,5 +100,4 @@ async def read_about():
 @app.get("/health", tags=["admin"])
 async def read_health():
     """Get the health status of the API."""
-    logger.info("GET /health")
     return {}

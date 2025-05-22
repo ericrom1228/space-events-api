@@ -1,6 +1,6 @@
 """Dependencies for FastAPI startup"""
-from fastapi import FastAPI, Request
 import logging
+from fastapi import FastAPI, Request
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from pymongo.errors import ServerSelectionTimeoutError
 from app.settings import settings
